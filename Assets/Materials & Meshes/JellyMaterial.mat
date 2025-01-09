@@ -12,11 +12,10 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _EMISSION
   - _RECEIVE_SHADOWS_OFF
   - _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
   m_InvalidKeywords: []
-  m_LightmapFlags: 1
+  m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 1
   m_CustomRenderQueue: -1
@@ -114,7 +113,7 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 0
     - _Refraction: 0.05
-    - _Smoothness: 0.8
+    - _Smoothness: 0.7
     - _SmoothnessTextureChannel: 1
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -126,7 +125,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 0.745283, g: 0.2636614, b: 0.5695519, a: 1}
     - _Color: {r: 0.745283, g: 0.26366135, b: 0.5695519, a: 1}
-    - _EmissionColor: {r: 0.37450984, g: 0.09716058, b: 0.20792694, a: 1}
+    - _EmissionColor: {r: 0.254717, g: 0.08530617, b: 0.15239954, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &3078590354697369567

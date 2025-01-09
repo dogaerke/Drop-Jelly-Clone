@@ -5,13 +5,28 @@ using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
-    private Dictionary<Vector2, Tile> Tiles { get; set; }
+    public Dictionary<Vector2, Tile> Tiles { get; set; }
     
     [Header("Tile Properties")]
     [SerializeField] [Range(0, 10)] public int width;
     [SerializeField] [Range(0, 10)] public int height;
+    [SerializeField] [Range(0, 2)] public int gridStep = 1; //Distance between 2 tiles
     [SerializeField] private Tile tilePrefab;
+    
 
+    public static GridManager Instance { get; private set; }
+    
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+
+        Instance = this;
+    }
+    
     private void Start()
     {
         GenerateGridsInGame();
@@ -21,9 +36,9 @@ public class GridManager : MonoBehaviour
     {
         Tiles = new Dictionary<Vector2, Tile>();
 
-        for (var x = 0; x < width; x++)
+        for (var x = 0; x < width; x += gridStep)
         {
-            for (var y = 0; y < height; y++)
+            for (var y = 0; y < height; y += gridStep)
             {
                 CreateTileInGame(x, y);
             }
@@ -34,7 +49,7 @@ public class GridManager : MonoBehaviour
     {
         var tile = Instantiate(tilePrefab, transform);
         
-        tile.transform.position = new Vector3(x, 0.06f, y);
+        tile.transform.position = new Vector3(x, 0.6f, y);
         tile.x = x;
         tile.y = y;
         Tiles.Add(new Vector2(x, y), tile);

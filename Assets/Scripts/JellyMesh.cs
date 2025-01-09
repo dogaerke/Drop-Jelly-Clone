@@ -44,8 +44,8 @@ public class JellyMesh : MonoBehaviour
     {
         public int id;
         public Vector3 position;
-        public Vector3 velocity;
-        public Vector3 force;
+        private Vector3 _velocity;
+        private Vector3 _force;
 
         public JellyVertex(int _id, Vector3 pos)
         {
@@ -55,10 +55,10 @@ public class JellyMesh : MonoBehaviour
         
         public void Shake(Vector3 target, float m, float s, float d)
         {
-            force = (target - position) * s;
-            velocity = (velocity + force / m) * d;
-            position += velocity;
-            if ((velocity + force + force / m).magnitude < 0.001f)
+            _force = (target - position) * s;
+            _velocity = (_velocity + _force / m) * d;
+            position += _velocity;
+            if ((_velocity + _force + _force / m).magnitude < 0.001f)
                 position = target;
             
 
