@@ -47,9 +47,8 @@ public class BoxManager : MonoBehaviour
     private void CreateBox(BoxCombination combination)
     {
         _box = Instantiate(boxPrefab, transform);
-        _box.transform.position = new Vector3(startPos.position.x, 0, startPos.position.z );
-        
         boxList.Add(_box.GetComponent<BoxController>());
+        _box.transform.position = new Vector3(startPos.position.x, 0, startPos.position.z );
         
         _box.GetComponent<BoxController>().isActive = true;
 
@@ -292,52 +291,7 @@ public class BoxManager : MonoBehaviour
         return newColor;
     }
     
-    public void CheckAndDestroyMatchingCubes(GameObject box)
-    {
-        var cubes = box.GetComponentsInChildren<Cube>();
-        var cubesToDestroy = new HashSet<Cube>(); // Yok edilecek küpler
-
-        foreach (var cube in cubes)
-        {
-            // Komşu küpleri kontrol et
-            var neighbors = FindNeighborCubes(cube, cubes);
-            foreach (var neighbor in neighbors)
-            {
-                if (neighbor.color == cube.color)
-                {
-                    cubesToDestroy.Add(cube);
-                    cubesToDestroy.Add(neighbor);
-                }
-            }
-        }
-
-        // Eşleşen küpleri yok et
-        foreach (var cube in cubesToDestroy)
-        {
-            Destroy(cube.gameObject);
-        }
-    }
-
-    private List<Cube> FindNeighborCubes(Cube cube, Cube[] allCubes)
-    {
-        var neighbors = new List<Cube>();
-        var directions = new Vector3[]
-        {
-            Vector3.left, Vector3.right,
-            Vector3.forward, Vector3.back
-        };
-
-        foreach (var direction in directions)
-        {
-            var neighborPos = cube.LocalPosition + direction;
-            var neighbor = allCubes.FirstOrDefault(c => c.LocalPosition == neighborPos);
-            if (neighbor != null)
-            {
-                neighbors.Add(neighbor);
-            }
-        }
-
-        return neighbors;
-    }
+    
+    
 
 }

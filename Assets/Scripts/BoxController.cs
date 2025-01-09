@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -9,11 +10,14 @@ public class BoxController : MonoBehaviour
     public Vector2 touchStartPos;
     public Vector2 touchDirection;
     public bool isActive;
+    private Cube[] _cubes;
     public event Action<Vector3> OnBoxDropped;
 
     private void Start()
     {
         OnBoxDropped += HandleBoxDropped;
+        _cubes = gameObject.GetComponentsInChildren<Cube>();
+
     }
     private void OnDestroy()
     {
@@ -87,19 +91,33 @@ public class BoxController : MonoBehaviour
         GridManager.Instance.Tiles.TryGetValue(new Vector2(targetPos.x, targetPos.z), out var tile);
         if (tile) tile.SetTileFull(true);
         
+        UpdateAllCubes();
+        TrySpawnNewBox();
+    }
+
+    private static void TrySpawnNewBox()
+    {
         var flag = false;
         
         foreach (var box in BoxManager.Instance.boxList)
         {
             if (box.isActive)
             {
-                flag = true;
+                flag = true;  //if there is activeBox, don't spawn new box
             }
 
         }
         if (!flag)
         {
             BoxManager.Instance.SpawnNewBox();
+        }
+    }
+
+    private void UpdateAllCubes()
+    {
+        foreach (var c in _cubes)
+        {
+            c.CheckNeighborsAndDestroy();  //Destroy same colored cubes
         }
     }
 
@@ -160,4 +178,5 @@ public class BoxController : MonoBehaviour
         GridManager.Instance.Tiles.TryGetValue(new Vector2(position.x, position.z), out var tile);
         return !tile || tile.isFull;
     }
+    
 }

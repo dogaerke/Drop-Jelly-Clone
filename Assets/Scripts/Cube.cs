@@ -6,14 +6,101 @@ using UnityEngine;
 public class Cube : MonoBehaviour
 {
     public Color color;
-    public Vector3 LocalPosition
-    {
-        get => transform.localPosition;
-        set => transform.localPosition = value;
-    }
-
+    private LayerMask _targetLayer;
+    private BoxController _parentBox;
+    public float rayDistance = 1f;
+    
     private void Start()
     {
         color = GetComponentInChildren<Renderer>().material.color;
+        _targetLayer = LayerMask.GetMask("Cube");
+        _parentBox = GetComponentInParent<BoxController>();
     }
+    
+
+    public void CheckNeighborsAndDestroy()
+    {
+        var affectedBoxes = new HashSet<BoxController>();
+        Vector3[] directions =
+        {
+            Vector3.right, 
+            Vector3.left, 
+            Vector3.forward,
+            Vector3.back
+        };
+        RayForMainCube(directions, affectedBoxes);
+        RayForAffectedCubes(directions, affectedBoxes);
+    }
+
+    private void RayForMainCube(IEnumerable<Vector3> directions, ISet<BoxController> affectedBoxes)
+    {
+        foreach (var direction in directions)
+        {
+            RaycastHit hit;
+
+            if (Physics.Raycast(transform.position, direction, out hit, rayDistance, _targetLayer))
+            {
+                var other = hit.collider.gameObject;
+                if (other && other.transform.parent != transform.parent)
+                {
+                    affectedBoxes.Add(other.GetComponentInParent<BoxController>());
+                    
+                    if (other.GetComponent<Cube>().color == color)
+                    {
+                        Destroy(other);
+                        Destroy(gameObject);
+                    }
+                }
+            }
+            else
+            {
+                Debug.Log($"There is no neighbour: Direction {direction}");
+            }
+
+            Debug.DrawRay(transform.position, direction * rayDistance, Color.red, 1f);
+        }
+    }
+    
+    private void RayForAffectedCubes(IEnumerable<Vector3> directions, ISet<BoxController> affectedBoxes)
+    {
+        foreach (var box in affectedBoxes)
+        {
+            var cubes = box.GetComponentsInChildren<Cube>();
+        
+            foreach (var cube in cubes)
+            {
+                CheckNeighborsForCube(cube, directions); 
+            }
+        }
+    }
+
+    private void CheckNeighborsForCube(Cube cube, IEnumerable<Vector3> directions)
+    {
+        foreach (var direction in directions)
+        {
+            RaycastHit hit;
+
+            if (Physics.Raycast(cube.transform.position, direction, out hit, rayDistance, _targetLayer))
+            {
+                var other = hit.collider.gameObject;
+
+                if (other && other.transform.parent != cube.transform.parent)
+                {
+                    var otherCube = other.GetComponent<Cube>();
+                    if (otherCube != null && otherCube.color == cube.color)
+                    {
+                        Destroy(other);
+                        Destroy(cube.gameObject);
+                    }
+                }
+            }
+            else
+            {
+                Debug.Log($"There is no neighbour: Direction {direction}");
+            }
+
+            Debug.DrawRay(cube.transform.position, direction * rayDistance, Color.red, 1f);
+        }
+    }
+    
 }
