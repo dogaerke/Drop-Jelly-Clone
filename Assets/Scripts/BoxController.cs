@@ -223,58 +223,7 @@ public class BoxController : MonoBehaviour
             Debug.Log("onUpdateCubes");
             cubeToDestroy.gameObject.SetActive(false);
             rulesData.CheckAndApplyGrowth(locationToCubeDict);
-            // switch (cubes.Count)
-            // {
-            //     case 1:
-            //         DestroyBox();
-            //         break;
-            //     case 2:
-            //     {
-            //         UpdateForOneCube(destroyedCube);
-            //         break;
-            //     }
-            //     case 3:
-            //         
-            //         break;
-            //     
-            //     case 4:
-            //          rulesData.CheckAndApplyGrowth(locationToCubeDict);
-            //         break;
-            // }
         }
         
     }
-
-    // private void UpdateForOneCube(Transform destroyedCube)
-    // {
-    //     foreach (var cube in cubes)
-    //     {
-    //         if (cube.transform == destroyedCube)continue;
-    //         if (cube.cubeLocation is CubeLocation.Right or CubeLocation.Left)
-    //         {
-    //             var scale = cube.transform.localScale;
-    //             var targetScale = new Vector3(scale.x * 2, scale.y, scale.z);
-    //             var targetPosition = new Vector3(0, cube.transform.localPosition.y, 0);
-    //             if (cube.gameObject.activeSelf)
-    //                 cube.AnimateGrowing(targetScale, targetPosition, 1f);
-    //         }
-    //                 
-    //         else if (cube.cubeLocation is CubeLocation.Top or CubeLocation.Bottom)
-    //         {
-    //             var scale = cube.gameObject.transform.localScale;
-    //             var targetScale = new Vector3(scale.x, scale.y, scale.z * 2);
-    //             var targetPosition = new Vector3(0, cube.transform.localPosition.y, 0);
-    //             if (cube.gameObject.activeSelf)
-    //                 cube.AnimateGrowing(targetScale, targetPosition, 1f);
-    //         }
-    //                 
-    //     }
-    //     cubes.Remove(destroyedCube.GetComponent<Cube>());
-    //     locationToCubeDict.Remove(destroyedCube.GetComponent<Cube>().cubeLocation);
-    //     Destroy(destroyedCube.gameObject);
-    //     if (cubes.Count == 0)
-    //     {
-    //         DestroyBox();
-    //     }
-    // }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AYellowpaper.SerializedCollections;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -16,7 +17,7 @@ public class GrowthRulesData : ScriptableObject
     {
         var cubeLocations = Enum.GetValues(typeof(CubeLocation));
         bool canGrow;
-        var index = 1;
+        var index = 2;
         do
         {
             var currentLocationType = (CubeLocation)cubeLocations.GetValue(index);
@@ -28,7 +29,7 @@ public class GrowthRulesData : ScriptableObject
                 var growthRule = growthRules[currentLocationType];
                 var targetPositionMultiplier = growthRule.PositionMultiplierMap[targetGrowthLocation];
                 var targetScaleMultiplier  = growthRule.ScaleMultiplierMap[targetGrowthLocation];
-                const float animationDuration = 0.3f;
+                var animationDuration = 0.3f;
         
                 if (locationToCubeMap.TryGetValue(currentLocationType, out var cube))
                 {
@@ -49,6 +50,8 @@ public class GrowthRulesData : ScriptableObject
                     if (cube.gameObject.activeSelf)
                     {
                         cube.AnimateGrowing(targetScale, targetPosition, animationDuration);
+                        //TODO Yeni Location Types atansın
+                        //TODO tekrar destroy olacak cube var mı diye bakılsın
                         
                         locationToCubeMap.TryGetValue(targetGrowthLocation, out var cubeToDestroy);
                         if (cubeToDestroy && !cubeToDestroy.gameObject.activeSelf)
@@ -82,6 +85,8 @@ public class GrowthRulesData : ScriptableObject
             return false;
         }
 
+        if (!locationToCubeDict.Keys.Contains(currentLocation)) return false;
+        
         Debug.Log("growthRule.CheckLocations.Count: " + growthRule.CheckLocations.Count);
         foreach (var location in growthRule.CheckLocations)
         {

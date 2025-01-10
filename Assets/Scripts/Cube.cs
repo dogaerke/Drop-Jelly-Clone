@@ -50,8 +50,6 @@ public class Cube : MonoBehaviour
                         var destroyedOther = other.transform;
                         _parentBox.UpdateCubes(destroyedCube);
                         destroyedOther.GetComponentInParent<BoxController>().UpdateCubes(destroyedOther);
-                        // Destroy(other);
-                        // Destroy(gameObject);
                         
                     }
                 }
@@ -93,9 +91,6 @@ public class Cube : MonoBehaviour
                         var destroyedOther = other.transform;
                         destroyedCube.GetComponentInParent<BoxController>().UpdateCubes(destroyedCube);
                         destroyedOther.GetComponentInParent<BoxController>().UpdateCubes(destroyedOther);
-                        // Destroy(cube.gameObject);
-                        // Destroy(other);
-
                     }
                 }
                 

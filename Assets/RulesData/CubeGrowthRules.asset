@@ -16,64 +16,96 @@ MonoBehaviour:
     _serializedList:
     - Key: 4
       Value:
-        checkLocations: 0500000002000000
+        checkLocations: 05000000020000000600000009000000
         positionMultiplierMap:
           _serializedList:
           - Key: 5
             Value: {x: 0, y: 1, z: 1}
           - Key: 2
             Value: {x: 1, y: 1, z: 0}
+          - Key: 6
+            Value: {x: 1, y: 1, z: 0}
+          - Key: 9
+            Value: {x: 0, y: 1, z: 1}
         scaleMultiplierMap:
           _serializedList:
           - Key: 5
             Value: {x: 2, y: 1, z: 1}
           - Key: 2
             Value: {x: 1, y: 1, z: 2}
+          - Key: 6
+            Value: {x: 1, y: 1, z: 2}
+          - Key: 9
+            Value: {x: 2, y: 1, z: 1}
     - Key: 5
       Value:
-        checkLocations: 0400000003000000
+        checkLocations: 04000000030000000600000008000000
         positionMultiplierMap:
           _serializedList:
           - Key: 4
             Value: {x: 0, y: 1, z: 1}
           - Key: 3
             Value: {x: 1, y: 1, z: 0}
+          - Key: 6
+            Value: {x: 1, y: 1, z: 0}
+          - Key: 8
+            Value: {x: 0, y: 1, z: 1}
         scaleMultiplierMap:
           _serializedList:
           - Key: 4
             Value: {x: 2, y: 1, z: 1}
           - Key: 3
             Value: {x: 1, y: 1, z: 2}
+          - Key: 6
+            Value: {x: 1, y: 1, z: 2}
+          - Key: 8
+            Value: {x: 2, y: 1, z: 1}
     - Key: 2
       Value:
-        checkLocations: 0300000004000000
+        checkLocations: 03000000040000000700000009000000
         positionMultiplierMap:
           _serializedList:
           - Key: 3
             Value: {x: 0, y: 1, z: 1}
           - Key: 4
             Value: {x: 1, y: 1, z: 0}
+          - Key: 7
+            Value: {x: 1, y: 1, z: 0}
+          - Key: 9
+            Value: {x: 0, y: 1, z: 1}
         scaleMultiplierMap:
           _serializedList:
           - Key: 3
             Value: {x: 2, y: 1, z: 1}
           - Key: 4
             Value: {x: 1, y: 1, z: 2}
+          - Key: 7
+            Value: {x: 1, y: 1, z: 2}
+          - Key: 9
+            Value: {x: 2, y: 1, z: 1}
     - Key: 3
       Value:
-        checkLocations: 0200000005000000
+        checkLocations: 02000000050000000700000008000000
         positionMultiplierMap:
           _serializedList:
           - Key: 2
             Value: {x: 0, y: 1, z: 1}
           - Key: 5
             Value: {x: 1, y: 1, z: 0}
+          - Key: 7
+            Value: {x: 1, y: 1, z: 0}
+          - Key: 8
+            Value: {x: 0, y: 1, z: 1}
         scaleMultiplierMap:
           _serializedList:
           - Key: 2
             Value: {x: 2, y: 1, z: 1}
           - Key: 5
             Value: {x: 1, y: 1, z: 2}
+          - Key: 7
+            Value: {x: 1, y: 1, z: 2}
+          - Key: 8
+            Value: {x: 2, y: 1, z: 1}
     - Key: 6
       Value:
         checkLocations: 07000000
