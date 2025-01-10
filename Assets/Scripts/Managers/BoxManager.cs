@@ -90,11 +90,43 @@ public class BoxManager : MonoBehaviour
                 
                 var newColor = GetUniqueColor(usedColors);
                 usedColors.Add(newColor);
-                CreateObject(cubePrefab, position, Vector3.one * cubeSize, box.transform, newColor);
+                var obj = CreateObject(cubePrefab, position, Vector3.one * cubeSize, box.transform, newColor);
+                DetermineFourCubesLocation(position, obj);
+
             }
         }
     }
-    
+
+    private static void DetermineFourCubesLocation(Vector3 position, GameObject obj)
+    {
+        if (position.x > 0)
+        {
+            if (position.z > 0)
+            {
+                obj.GetComponent<Cube>().cubeLocation = CubeLocation.TopRight;
+            }
+            else if (position.z < 0)
+            {
+                obj.GetComponent<Cube>().cubeLocation = CubeLocation.BottomRight;
+
+            }
+        }
+        else if (position.x < 0)
+        {
+            if (position.z > 0)
+            {
+                obj.GetComponent<Cube>().cubeLocation = CubeLocation.TopLeft;
+
+            }
+            else if (position.z < 0)
+            {
+                obj.GetComponent<Cube>().cubeLocation = CubeLocation.BottomLeft;
+
+            }
+
+        }
+    }
+
     private void CreateTwoCubesOnePrism(GameObject box)
     {
         var cubeSize = _boxSize / 2f;
@@ -123,41 +155,50 @@ public class BoxManager : MonoBehaviour
         var newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor);
         // Right Vertical Prism 
-        CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, 0), 
+        var obj = CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, 0), 
             new Vector3(cubeSize, cubeSize , cubeSize * 2), box.transform, newColor);
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.Right;
+        
         
         newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor);
         // Cubes
-        CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, cubeSize / 2),
+        obj = CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, cubeSize / 2),
             Vector3.one * cubeSize, box.transform, newColor);  // Left Up Cube
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.TopLeft;
+
+        
         newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor);
-        
-        CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, -cubeSize / 2), 
+        obj = CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, -cubeSize / 2), 
             Vector3.one * cubeSize, box.transform, newColor); // Left Down Cube
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.BottomLeft;
+
     }
     private void SpawnVerticalPrismLeft(float cubeSize, GameObject box, List<Color> usedColors)
     {
         var newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor);
-        
         // Left Vertical Prism 
-        CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, 0), 
+        var obj = CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, 0), 
             new Vector3(cubeSize, cubeSize , cubeSize * 2), box.transform, newColor);
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.Left;
+
         
         newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor);
-        
         // Cubes
-        CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, cubeSize / 2),
+        obj = CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, cubeSize / 2),
             Vector3.one * cubeSize, box.transform, newColor);  // Right Up Cube
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.TopRight;
+        
         
         newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor);
-        
-        CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, -cubeSize / 2), 
+        obj = CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, -cubeSize / 2), 
             Vector3.one * cubeSize, box.transform, newColor); // Right Down Cube
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.BottomRight;
+
     }
     private void SpawnHorizontalPrismUp(float cubeSize, GameObject box, List<Color> usedColors)
     {
@@ -165,43 +206,50 @@ public class BoxManager : MonoBehaviour
         usedColors.Add(newColor);
         
         // Horizontal Up Prism 
-        CreateObject(cubePrefab, new Vector3(0, 0, cubeSize / 2), 
+        var obj = CreateObject(cubePrefab, new Vector3(0, 0, cubeSize / 2), 
             new Vector3(cubeSize * 2, cubeSize , cubeSize), box.transform, newColor);
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.Top;
+
         
         newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor);
-        
         // Cubes
-        CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, -cubeSize / 2), 
+        obj = CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, -cubeSize / 2), 
             Vector3.one * cubeSize, box.transform, newColor); // Left Down Cube
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.BottomLeft;
+
         
         newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor);
-        
-        CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, -cubeSize / 2),
+        obj = CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, -cubeSize / 2),
             Vector3.one * cubeSize, box.transform, newColor);  // Right Down Cube
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.BottomRight;
+
     }
     private void SpawnHorizontalPrismDown(float cubeSize, GameObject box, List<Color> usedColors)
     {
         var newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor);
-        
         // Horizontal Down Prism 
-        CreateObject(cubePrefab, new Vector3(0, 0, -cubeSize / 2), 
+        var obj = CreateObject(cubePrefab, new Vector3(0, 0, -cubeSize / 2), 
             new Vector3(cubeSize * 2, cubeSize , cubeSize), box.transform, newColor);
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.Bottom;
+
         
         newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor);
-        
         // Cubes
-        CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, cubeSize / 2), 
+        obj = CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, cubeSize / 2), 
             Vector3.one * cubeSize, box.transform, newColor); // Left Up Cube
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.TopLeft;
+
         
         newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor); 
-        
-        CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, cubeSize / 2),
+        obj = CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, cubeSize / 2),
             Vector3.one * cubeSize, box.transform, newColor);  // Right Up Cube
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.TopRight;
+
     }
 
 
@@ -229,15 +277,19 @@ public class BoxManager : MonoBehaviour
         usedColors.Add(newColor); 
         
         // Horizontal Down Prism 
-        CreateObject(cubePrefab, new Vector3(0, 0, -cubeSize / 2), 
+        var obj = CreateObject(cubePrefab, new Vector3(0, 0, -cubeSize / 2), 
             new Vector3(cubeSize * 2, cubeSize , cubeSize), box.transform, newColor);
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.Bottom;
+
         
         newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor); 
         
         // Horizontal Up Prism 
-        CreateObject(cubePrefab, new Vector3(0, 0, cubeSize / 2), 
+        obj = CreateObject(cubePrefab, new Vector3(0, 0, cubeSize / 2), 
             new Vector3(cubeSize * 2, cubeSize , cubeSize), box.transform, newColor);
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.Top;
+
         
     }
 
@@ -246,29 +298,35 @@ public class BoxManager : MonoBehaviour
         var newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor); 
         // Left Vertical Prism 
-        CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, 0), 
+        var obj = CreateObject(cubePrefab, new Vector3(-cubeSize / 2, 0, 0), 
             new Vector3(cubeSize, cubeSize , cubeSize * 2), box.transform, newColor);
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.Left;
+
         
         newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor); 
-        
         // Right Vertical Prism 
-        CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, 0), 
+        obj = CreateObject(cubePrefab, new Vector3(cubeSize / 2, 0, 0), 
             new Vector3(cubeSize, cubeSize , cubeSize * 2), box.transform, newColor);
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.Right;
+
         
     }
 
-    private void CreateOneBigCube(GameObject box)
+    public void CreateOneBigCube(GameObject box)
     {
         var cubeSize = _boxSize;
         var usedColors = new List<Color>();
         var newColor = GetUniqueColor(usedColors);
         usedColors.Add(newColor); 
         
-        CreateObject(cubePrefab, Vector3.zero, new Vector3(cubeSize, cubeSize / 2, cubeSize), box.transform, newColor);
+        var obj = CreateObject(cubePrefab, Vector3.zero, 
+            new Vector3(cubeSize, cubeSize / 2, cubeSize), box.transform, newColor);
+        obj.GetComponent<Cube>().cubeLocation = CubeLocation.Middle;
+
     }
 
-    private void CreateObject(GameObject prefab, Vector3 position, Vector3 size, Transform boxTransform, Color color)
+    private GameObject CreateObject(GameObject prefab, Vector3 position, Vector3 size, Transform boxTransform, Color color)
     {
         var obj = Instantiate(prefab, boxTransform);
         position.y = startPos.position.y;
@@ -277,7 +335,7 @@ public class BoxManager : MonoBehaviour
         obj.transform.localScale = size;
 
         obj.GetComponentInChildren<Renderer>().material.color = color;
-
+        return obj;
     }
 
     private Color GetUniqueColor(List<Color> usedColors)

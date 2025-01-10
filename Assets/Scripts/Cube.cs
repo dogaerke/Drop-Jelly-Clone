@@ -8,7 +8,8 @@ public class Cube : MonoBehaviour
     public Color color;
     private LayerMask _targetLayer;
     private BoxController _parentBox;
-    public float rayDistance = 1f;
+    public float rayDistance = 0.5f;
+    public CubeLocation cubeLocation;
     
     private void Start()
     {
@@ -16,8 +17,6 @@ public class Cube : MonoBehaviour
         _targetLayer = LayerMask.GetMask("Cube");
         _parentBox = GetComponentInParent<BoxController>();
     }
-    
-
     public void CheckNeighborsAndDestroy()
     {
         var affectedBoxes = new HashSet<BoxController>();
@@ -47,8 +46,13 @@ public class Cube : MonoBehaviour
                     
                     if (other.GetComponent<Cube>().color == color)
                     {
-                        Destroy(other);
-                        Destroy(gameObject);
+                        var destroyedCube = gameObject.transform;
+                        var destroyedOther = other.transform;
+                        _parentBox.UpdateCubes(destroyedCube);
+                        destroyedOther.GetComponentInParent<BoxController>().UpdateCubes(destroyedOther);
+                        // Destroy(other);
+                        // Destroy(gameObject);
+                        
                     }
                 }
             }
@@ -87,12 +91,18 @@ public class Cube : MonoBehaviour
                 if (other && other.transform.parent != cube.transform.parent)
                 {
                     var otherCube = other.GetComponent<Cube>();
-                    if (otherCube != null && otherCube.color == cube.color)
+                    if (otherCube && otherCube.color == cube.color)
                     {
-                        Destroy(other);
-                        Destroy(cube.gameObject);
+                        var destroyedCube = cube.gameObject.transform;
+                        var destroyedOther = other.transform;
+                        destroyedCube.GetComponentInParent<BoxController>().UpdateCubes(destroyedCube);
+                        destroyedOther.GetComponentInParent<BoxController>().UpdateCubes(destroyedOther);
+                        // Destroy(cube.gameObject);
+                        // Destroy(other);
+
                     }
                 }
+                
             }
             else
             {
@@ -103,4 +113,17 @@ public class Cube : MonoBehaviour
         }
     }
     
+}
+
+public enum CubeLocation
+{
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
+    Top,
+    Bottom,
+    Left,
+    Right,
+    Middle
 }

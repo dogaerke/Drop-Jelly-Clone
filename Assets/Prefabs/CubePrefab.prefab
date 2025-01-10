@@ -96,6 +96,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   color: {r: 0, g: 0, b: 0, a: 0}
+  rayDistance: 0.5
+  cubeLocation: 0
 --- !u!1 &8914792751181793488
 GameObject:
   m_ObjectHideFlags: 0
@@ -192,7 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e6a4a5c9e17a234b8e254025a8e0247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Intensity: 0.3
+  Intensity: 0.6
   mass: 1
   stiffnes: 1
   damping: 0.75

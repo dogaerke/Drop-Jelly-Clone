@@ -10,13 +10,13 @@ public class BoxController : MonoBehaviour
     public Vector2 touchStartPos;
     public Vector2 touchDirection;
     public bool isActive;
-    private Cube[] _cubes;
+    public List<Cube> cubes;
     public event Action<Vector3> OnBoxDropped;
 
     private void Start()
     {
         OnBoxDropped += HandleBoxDropped;
-        _cubes = gameObject.GetComponentsInChildren<Cube>();
+        cubes = new List<Cube>(gameObject.GetComponentsInChildren<Cube>());
 
     }
     private void OnDestroy()
@@ -67,7 +67,7 @@ public class BoxController : MonoBehaviour
             }
         }
     }
-
+    
     private void MoveBox(Vector3 _direction)
     {
         var gridManager = GridManager.Instance;
@@ -91,7 +91,7 @@ public class BoxController : MonoBehaviour
         GridManager.Instance.Tiles.TryGetValue(new Vector2(targetPos.x, targetPos.z), out var tile);
         if (tile) tile.SetTileFull(true);
         
-        UpdateAllCubes();
+        DestroySameColorCubes();
         TrySpawnNewBox();
     }
 
@@ -113,12 +113,18 @@ public class BoxController : MonoBehaviour
         }
     }
 
-    private void UpdateAllCubes()
+    private void DestroySameColorCubes()
     {
-        foreach (var c in _cubes)
+        for (var i = 0; i < cubes.Count; i++)
         {
-            c.CheckNeighborsAndDestroy();  //Destroy same colored cubes
+            cubes[i].CheckNeighborsAndDestroy();
+
         }
+        // foreach (var c in cubes)
+        // {
+        //     c.CheckNeighborsAndDestroy();
+        //         
+        // }
     }
 
     private IEnumerator DropActiveBox()
@@ -178,5 +184,104 @@ public class BoxController : MonoBehaviour
         GridManager.Instance.Tiles.TryGetValue(new Vector2(position.x, position.z), out var tile);
         return !tile || tile.isFull;
     }
+
+    private void DestroyBox()
+    {
+        var length = cubes.Count;
+        for (var i = 0; i < length; i++)
+        {
+            var obj = cubes[i].gameObject;
+            cubes.Remove(cubes[i]);
+            Destroy(obj);
+            
+        }
+        
+        GridManager.Instance.Tiles.TryGetValue
+            (new Vector2(transform.position.x, transform.position.z), out var tile);
+        if(tile) tile.SetTileFull(false);
+        BoxManager.Instance.boxList.Remove(this);
+        Destroy(gameObject);
+        
+    }
+    public void UpdateCubes(Transform destroyedCube)
+    {
+        if (destroyedCube)
+        {
+            destroyedCube.gameObject.SetActive(false);
+            if (cubes.Count == 1)
+            {
+                DestroyBox();
+            }
+            else if (cubes.Count == 2)
+            {
+                foreach (var cube in cubes)
+                {
+                    if (cube.transform == destroyedCube)continue;
+                    //if (cube.transform != destroyedCube)
+                    //{
+                    if (cube.cubeLocation == CubeLocation.Right)
+                    {
+                        var scale = cube.gameObject.transform.localScale;
+                        var targetScale = new Vector3(scale.x * 2, scale.y, scale.z);
+                        StartCoroutine(AnimateGrowth(cube.transform, targetScale, 1f));
+                    }
+                    else if (cube.cubeLocation == CubeLocation.Left)
+                    {
+                        var scale = cube.gameObject.transform.localScale;
+                        var targetScale = new Vector3(scale.x * 2, scale.y, scale.z);
+                        StartCoroutine(AnimateGrowth(cube.transform, targetScale, 1f));
+                    }
+                    else if (cube.cubeLocation == CubeLocation.Top)
+                    {
+                        var scale = cube.gameObject.transform.localScale;
+                        var targetScale = new Vector3(scale.x, scale.y, scale.z * 2);
+                        StartCoroutine(AnimateGrowth(cube.transform, targetScale, 1f));
+                    }
+                    else if (cube.cubeLocation == CubeLocation.Bottom)
+                    {
+                        var scale = cube.gameObject.transform.localScale;
+                        var targetScale = new Vector3(scale.x, scale.y, scale.z * 2);
+                        StartCoroutine(AnimateGrowth(cube.transform, targetScale, 1f));
+                    }
+                    //}
+                }
+                cubes.Remove(destroyedCube.GetComponent<Cube>());
+                Destroy(destroyedCube.gameObject);
+                if (cubes.Count == 0)
+                {
+                    DestroyBox();
+                }
+                
+            }
+            
+        }
+        
+
+    }
+    
+    private IEnumerator AnimateGrowth(Transform growingCube, Vector3 targetScale, float duration)
+    {
+        if (!growingCube) yield return null;
+        
+        var initialScale = growingCube.localScale;
+        var elapsedTime = 0f;
+        var originalPosition = growingCube.localPosition;
+        var targetPosition = new Vector3(0, growingCube.localPosition.y, 0);
+    
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            var t = elapsedTime / duration;
+            growingCube.localScale = Vector3.Lerp(initialScale, targetScale, t);
+            growingCube.localPosition = Vector3.Lerp(originalPosition, targetPosition, t);
+            yield return null;
+        }
+    
+        growingCube.localScale = targetScale;
+        growingCube.localPosition = targetPosition;
+    }
+    
+
+    
     
 }
