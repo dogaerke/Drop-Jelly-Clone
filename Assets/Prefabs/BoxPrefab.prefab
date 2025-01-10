@@ -47,3 +47,5 @@ MonoBehaviour:
   touchStartPos: {x: 0, y: 0}
   touchDirection: {x: 0, y: 0}
   isActive: 0
+  cubes: []
+  rulesData: {fileID: 11400000, guid: 532686775320c98428f890a66d77f582, type: 2}

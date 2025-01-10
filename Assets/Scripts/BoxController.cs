@@ -11,12 +11,19 @@ public class BoxController : MonoBehaviour
     public Vector2 touchDirection;
     public bool isActive;
     public List<Cube> cubes;
+    public Dictionary<CubeLocation, Cube> locationToCubeDict = new Dictionary<CubeLocation, Cube>();
+    public CubeGrowthRulesSO rulesData;
+    
     public event Action<Vector3> OnBoxDropped;
 
     private void Start()
     {
         OnBoxDropped += HandleBoxDropped;
         cubes = new List<Cube>(gameObject.GetComponentsInChildren<Cube>());
+        foreach (var c in cubes)
+        {
+            locationToCubeDict.Add(c.cubeLocation, c);
+        }
 
     }
     private void OnDestroy()
@@ -192,6 +199,7 @@ public class BoxController : MonoBehaviour
         {
             var obj = cubes[i].gameObject;
             cubes.Remove(cubes[i]);
+            locationToCubeDict.Remove(obj.GetComponent<Cube>().cubeLocation);
             Destroy(obj);
             
         }
@@ -208,80 +216,58 @@ public class BoxController : MonoBehaviour
         if (destroyedCube)
         {
             destroyedCube.gameObject.SetActive(false);
-            if (cubes.Count == 1)
+            switch (cubes.Count)
             {
-                DestroyBox();
-            }
-            else if (cubes.Count == 2)
-            {
-                foreach (var cube in cubes)
-                {
-                    if (cube.transform == destroyedCube)continue;
-                    //if (cube.transform != destroyedCube)
-                    //{
-                    if (cube.cubeLocation == CubeLocation.Right)
-                    {
-                        var scale = cube.gameObject.transform.localScale;
-                        var targetScale = new Vector3(scale.x * 2, scale.y, scale.z);
-                        StartCoroutine(AnimateGrowth(cube.transform, targetScale, 1f));
-                    }
-                    else if (cube.cubeLocation == CubeLocation.Left)
-                    {
-                        var scale = cube.gameObject.transform.localScale;
-                        var targetScale = new Vector3(scale.x * 2, scale.y, scale.z);
-                        StartCoroutine(AnimateGrowth(cube.transform, targetScale, 1f));
-                    }
-                    else if (cube.cubeLocation == CubeLocation.Top)
-                    {
-                        var scale = cube.gameObject.transform.localScale;
-                        var targetScale = new Vector3(scale.x, scale.y, scale.z * 2);
-                        StartCoroutine(AnimateGrowth(cube.transform, targetScale, 1f));
-                    }
-                    else if (cube.cubeLocation == CubeLocation.Bottom)
-                    {
-                        var scale = cube.gameObject.transform.localScale;
-                        var targetScale = new Vector3(scale.x, scale.y, scale.z * 2);
-                        StartCoroutine(AnimateGrowth(cube.transform, targetScale, 1f));
-                    }
-                    //}
-                }
-                cubes.Remove(destroyedCube.GetComponent<Cube>());
-                Destroy(destroyedCube.gameObject);
-                if (cubes.Count == 0)
-                {
+                case 1:
                     DestroyBox();
+                    break;
+                case 2:
+                {
+                    UpdateForOneCube(destroyedCube);
+                    break;
                 }
+                case 3:
+                    
+                    break;
                 
+                case 4:
+                     rulesData.CheckAndApplyGrowth(locationToCubeDict);
+                    break;
             }
-            
         }
         
-
     }
-    
-    private IEnumerator AnimateGrowth(Transform growingCube, Vector3 targetScale, float duration)
+
+    private void UpdateForOneCube(Transform destroyedCube)
     {
-        if (!growingCube) yield return null;
-        
-        var initialScale = growingCube.localScale;
-        var elapsedTime = 0f;
-        var originalPosition = growingCube.localPosition;
-        var targetPosition = new Vector3(0, growingCube.localPosition.y, 0);
-    
-        while (elapsedTime < duration)
+        foreach (var cube in cubes)
         {
-            elapsedTime += Time.deltaTime;
-            var t = elapsedTime / duration;
-            growingCube.localScale = Vector3.Lerp(initialScale, targetScale, t);
-            growingCube.localPosition = Vector3.Lerp(originalPosition, targetPosition, t);
-            yield return null;
+            if (cube.transform == destroyedCube)continue;
+            if (cube.cubeLocation is CubeLocation.Right or CubeLocation.Left)
+            {
+                var scale = cube.transform.localScale;
+                var targetScale = new Vector3(scale.x * 2, scale.y, scale.z);
+                var targetPosition = new Vector3(0, cube.transform.localPosition.y, 0);
+                if (cube.gameObject.activeSelf)
+                    cube.AnimateGrowing(targetScale, targetPosition, 1f);
+            }
+                    
+            else if (cube.cubeLocation is CubeLocation.Top or CubeLocation.Bottom)
+            {
+                var scale = cube.gameObject.transform.localScale;
+                var targetScale = new Vector3(scale.x, scale.y, scale.z * 2);
+                var targetPosition = new Vector3(0, cube.transform.localPosition.y, 0);
+                if (cube.gameObject.activeSelf)
+                    cube.AnimateGrowing(targetScale, targetPosition, 1f);
+            }
+                    
         }
-    
-        growingCube.localScale = targetScale;
-        growingCube.localPosition = targetPosition;
+        cubes.Remove(destroyedCube.GetComponent<Cube>());
+        locationToCubeDict.Remove(destroyedCube.GetComponent<Cube>().cubeLocation);
+        Destroy(destroyedCube.gameObject);
+        if (cubes.Count == 0)
+        {
+            DestroyBox();
+        }
     }
-    
-
-    
-    
 }

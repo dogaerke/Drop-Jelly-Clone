@@ -56,10 +56,6 @@ public class Cube : MonoBehaviour
                     }
                 }
             }
-            else
-            {
-                Debug.Log($"There is no neighbour: Direction {direction}");
-            }
 
             Debug.DrawRay(transform.position, direction * rayDistance, Color.red, 1f);
         }
@@ -104,19 +100,39 @@ public class Cube : MonoBehaviour
                 }
                 
             }
-            else
-            {
-                Debug.Log($"There is no neighbour: Direction {direction}");
-            }
 
             Debug.DrawRay(cube.transform.position, direction * rayDistance, Color.red, 1f);
         }
     }
+
+    public void AnimateGrowing(Vector3 targetScale, Vector3 targetPosition, float duration)
+    {
+        StartCoroutine(AnimateGrowth(targetScale, targetPosition, 1f));
     
+    }
+    private IEnumerator AnimateGrowth(Vector3 targetScale, Vector3 targetPosition, float duration)
+    {
+        var initialScale = transform.localScale;
+        var elapsedTime = 0f;
+        var originalPosition = transform.localPosition;
+    
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            var t = elapsedTime / duration;
+            transform.localScale = Vector3.Lerp(initialScale, targetScale, t);
+            transform.localPosition = Vector3.Lerp(originalPosition, targetPosition, t);
+            yield return null;
+        }
+    
+        transform.localScale = targetScale;
+        transform.localPosition = targetPosition;
+    }
 }
 
 public enum CubeLocation
 {
+    Default,
     TopLeft,
     TopRight,
     BottomLeft,
