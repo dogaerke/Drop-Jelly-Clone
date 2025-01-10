@@ -16,61 +16,138 @@ MonoBehaviour:
     _serializedList:
     - Key: 4
       Value:
-        checkLocations: 0300000002000000
-        slotPositionMap:
+        checkLocations: 0500000002000000
+        positionMultiplierMap:
           _serializedList:
-          - Key: 3
+          - Key: 5
             Value: {x: 0, y: 1, z: 1}
           - Key: 2
             Value: {x: 1, y: 1, z: 0}
-        slotScaleMap:
+        scaleMultiplierMap:
           _serializedList:
-          - Key: 3
+          - Key: 5
             Value: {x: 2, y: 1, z: 1}
           - Key: 2
             Value: {x: 1, y: 1, z: 2}
-    - Key: 1
+    - Key: 5
       Value:
-        checkLocations: 0200000003000000
-        slotPositionMap:
+        checkLocations: 0400000003000000
+        positionMultiplierMap:
           _serializedList:
-          - Key: 2
+          - Key: 4
             Value: {x: 0, y: 1, z: 1}
           - Key: 3
             Value: {x: 1, y: 1, z: 0}
-        slotScaleMap:
+        scaleMultiplierMap:
           _serializedList:
-          - Key: 2
+          - Key: 4
             Value: {x: 2, y: 1, z: 1}
           - Key: 3
             Value: {x: 1, y: 1, z: 2}
     - Key: 2
       Value:
-        checkLocations: 0100000004000000
-        slotPositionMap:
+        checkLocations: 0300000004000000
+        positionMultiplierMap:
           _serializedList:
-          - Key: 1
+          - Key: 3
             Value: {x: 0, y: 1, z: 1}
           - Key: 4
             Value: {x: 1, y: 1, z: 0}
-        slotScaleMap:
+        scaleMultiplierMap:
           _serializedList:
-          - Key: 1
+          - Key: 3
             Value: {x: 2, y: 1, z: 1}
           - Key: 4
             Value: {x: 1, y: 1, z: 2}
     - Key: 3
       Value:
-        checkLocations: 0400000001000000
-        slotPositionMap:
+        checkLocations: 0200000005000000
+        positionMultiplierMap:
           _serializedList:
-          - Key: 4
+          - Key: 2
             Value: {x: 0, y: 1, z: 1}
-          - Key: 1
+          - Key: 5
             Value: {x: 1, y: 1, z: 0}
-        slotScaleMap:
+        scaleMultiplierMap:
+          _serializedList:
+          - Key: 2
+            Value: {x: 2, y: 1, z: 1}
+          - Key: 5
+            Value: {x: 1, y: 1, z: 2}
+    - Key: 6
+      Value:
+        checkLocations: 07000000
+        positionMultiplierMap:
+          _serializedList:
+          - Key: 7
+            Value: {x: 0, y: 1, z: 0}
+        scaleMultiplierMap:
+          _serializedList:
+          - Key: 7
+            Value: {x: 1, y: 1, z: 2}
+    - Key: 7
+      Value:
+        checkLocations: 06000000
+        positionMultiplierMap:
+          _serializedList:
+          - Key: 6
+            Value: {x: 0, y: 1, z: 0}
+        scaleMultiplierMap:
+          _serializedList:
+          - Key: 6
+            Value: {x: 1, y: 1, z: 2}
+    - Key: 8
+      Value:
+        checkLocations: 09000000
+        positionMultiplierMap:
+          _serializedList:
+          - Key: 9
+            Value: {x: 0, y: 1, z: 0}
+        scaleMultiplierMap:
+          _serializedList:
+          - Key: 9
+            Value: {x: 2, y: 1, z: 1}
+    - Key: 9
+      Value:
+        checkLocations: 08000000
+        positionMultiplierMap:
+          _serializedList:
+          - Key: 8
+            Value: {x: 0, y: 1, z: 0}
+        scaleMultiplierMap:
+          _serializedList:
+          - Key: 8
+            Value: {x: 2, y: 1, z: 1}
+    - Key: 10
+      Value:
+        checkLocations: 01000000
+        positionMultiplierMap:
+          _serializedList: []
+        scaleMultiplierMap:
+          _serializedList: []
+  locationTypeChangeRules:
+    _serializedList:
+    - Key: 6
+      Value:
+        newLocationMap:
+          _serializedList:
+          - Key: 2
+            Value: 3
+    - Key: 7
+      Value:
+        newLocationMap:
           _serializedList:
           - Key: 4
-            Value: {x: 2, y: 1, z: 1}
-          - Key: 1
-            Value: {x: 1, y: 1, z: 2}
+            Value: 5
+    - Key: 8
+      Value:
+        newLocationMap:
+          _serializedList:
+          - Key: 2
+            Value: 4
+    - Key: 9
+      Value:
+        newLocationMap:
+          _serializedList:
+          - Key: 3
+            Value: 5

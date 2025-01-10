@@ -107,8 +107,9 @@ public class Cube : MonoBehaviour
 
     public void AnimateGrowing(Vector3 targetScale, Vector3 targetPosition, float duration)
     {
+        //if (targetScale.x >= 1 || targetScale.z >= 1)return;
         StartCoroutine(AnimateGrowth(targetScale, targetPosition, 1f));
-    
+        
     }
     private IEnumerator AnimateGrowth(Vector3 targetScale, Vector3 targetPosition, float duration)
     {
@@ -128,11 +129,23 @@ public class Cube : MonoBehaviour
         transform.localScale = targetScale;
         transform.localPosition = targetPosition;
     }
+
+    public void DestroyCube()
+    {
+        _parentBox.cubes.Remove(this);
+        _parentBox.locationToCubeDict.Remove(cubeLocation);
+        Destroy(gameObject);
+        if (_parentBox.cubes.Count == 0)
+        {
+            _parentBox.DestroyBox();
+        }
+    }
 }
 
 public enum CubeLocation
 {
     Default,
+    Null,
     TopLeft,
     TopRight,
     BottomLeft,
