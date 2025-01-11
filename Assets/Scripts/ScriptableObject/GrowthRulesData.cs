@@ -26,8 +26,7 @@ public class GrowthRulesData : ScriptableObject
             var currentLocationType = (CubeLocation)cubeLocations.GetValue(index);
             Debug.Log($"i =  + {index}, CheckType = {currentLocationType}");
             
-            canGrowOrDestroy = TryFindGrowthSlot(currentLocationType, out var targetGrowthLocation, 
-                out var otherGrowthLocations, locationToCubeMap);
+            canGrowOrDestroy = TryFindGrowthSlot(currentLocationType, out var targetGrowthLocation, locationToCubeMap);
         
             if (canGrowOrDestroy)
             {
@@ -84,11 +83,10 @@ public class GrowthRulesData : ScriptableObject
         
     }
     
-    private bool TryFindGrowthSlot(CubeLocation currentLocation, out CubeLocation availableLocation, out List<CubeLocation> otherGrowthLocations,
-        Dictionary<CubeLocation, Cube> locationToCubeDict)
+    private bool TryFindGrowthSlot(CubeLocation currentLocation, out CubeLocation availableLocation, Dictionary<CubeLocation, Cube> locationToCubeDict)
     {
         availableLocation = CubeLocation.Default;
-        otherGrowthLocations = default;
+        //otherGrowthLocations = default;
         if (!growthRules.TryGetValue(currentLocation, out var growthRule))
         {
             return false;
@@ -108,31 +106,28 @@ public class GrowthRulesData : ScriptableObject
             
             if (cube && !cube.gameObject.activeSelf)
             {
-                
-                if (growthRule.AdjacentParentLocations != null && !growthRule.AdjacentParentLocations.Contains(location))
-                {
-                    availableLocation = location;
-                    return true;
-
-                }
-
-                growthRules.TryGetValue(location, out var parentGrowthRule);
-                otherGrowthLocations = parentGrowthRule?.ChildLocations;
-                
-                var checkList = growthRule.CheckLocations;
-                var intersectionList = otherGrowthLocations?.Intersect(checkList).ToList();
-                if (intersectionList == null) return false;
-                
-                if (intersectionList?.Count == 0) continue;
-                availableLocation = intersectionList[0];
-                otherGrowthLocations?.Remove(availableLocation);
-
-                
+                //
+                // if (growthRule.AdjacentParentLocations != null && !growthRule.AdjacentParentLocations.Contains(location))
+                // {
+                availableLocation = location;
                 return true;
+
+                // }
+                //
+                // growthRules.TryGetValue(location, out var parentGrowthRule);
+                // otherGrowthLocations = parentGrowthRule?.ChildLocations;
+                //
+                // var checkList = growthRule.CheckLocations;
+                // var intersectionList = otherGrowthLocations?.Intersect(checkList).ToList();
+                // if (intersectionList == null) return false;
+                //
+                // if (intersectionList?.Count == 0) continue;
+                // availableLocation = intersectionList[0];
+                // otherGrowthLocations?.Remove(availableLocation);
+                
+                //return true;
                 
             }
-            
-            
         }
         return false;
     }
