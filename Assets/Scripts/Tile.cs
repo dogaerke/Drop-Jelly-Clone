@@ -10,7 +10,7 @@ public class Tile : MonoBehaviour
     public bool hasObstacle;
     public bool isFull = false;
 
-    public void SetTileFull(bool isFull)
+    public void SetTileFullness(bool isFull)
     {
         this.isFull = isFull;
     }

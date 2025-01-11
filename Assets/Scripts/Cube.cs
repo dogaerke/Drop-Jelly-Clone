@@ -2,21 +2,30 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Cube : MonoBehaviour
 {
     public Color color;
-    private LayerMask _targetLayer;
-    private BoxController _parentBox;
-    public float rayDistance = 0.5f;
+    public BoxController parentBox;
     public CubeLocation cubeLocation;
     
+    private LayerMask _targetLayer;
+    private const float RayDistance = 1f;
+
     private void Start()
     {
         color = GetComponentInChildren<Renderer>().material.color;
         _targetLayer = LayerMask.GetMask("Cube");
-        _parentBox = GetComponentInParent<BoxController>();
+        parentBox = GetComponentInParent<BoxController>();
     }
+
+    private void OnDestroy()
+    {
+        StopAllCoroutines();
+
+    }
+
     public void CheckNeighborsAndDestroy()
     {
         var affectedBoxes = new HashSet<BoxController>();
@@ -27,6 +36,7 @@ public class Cube : MonoBehaviour
             Vector3.forward,
             Vector3.back
         };
+
         RayForMainCube(directions, affectedBoxes);
         RayForAffectedCubes(directions, affectedBoxes);
     }
@@ -37,7 +47,7 @@ public class Cube : MonoBehaviour
         {
             RaycastHit hit;
 
-            if (Physics.Raycast(transform.position, direction, out hit, rayDistance, _targetLayer))
+            if (Physics.Raycast(transform.position, direction, out hit, RayDistance, _targetLayer))
             {
                 var other = hit.collider.gameObject;
                 if (other && other.transform.parent != transform.parent)
@@ -48,14 +58,14 @@ public class Cube : MonoBehaviour
                     {
                         var destroyedCube = gameObject.transform;
                         var destroyedOther = other.transform;
-                        _parentBox.UpdateCubes(destroyedCube);
+                        parentBox.UpdateCubes(destroyedCube);
                         destroyedOther.GetComponentInParent<BoxController>().UpdateCubes(destroyedOther);
                         
                     }
                 }
             }
 
-            Debug.DrawRay(transform.position, direction * rayDistance, Color.red, 1f);
+            Debug.DrawRay(transform.position, direction * RayDistance, Color.red, 1f);
         }
     }
     
@@ -78,7 +88,7 @@ public class Cube : MonoBehaviour
         {
             RaycastHit hit;
 
-            if (Physics.Raycast(cube.transform.position, direction, out hit, rayDistance, _targetLayer))
+            if (Physics.Raycast(cube.transform.position, direction, out hit, RayDistance, _targetLayer))
             {
                 var other = hit.collider.gameObject;
 
@@ -96,22 +106,32 @@ public class Cube : MonoBehaviour
                 
             }
 
-            Debug.DrawRay(cube.transform.position, direction * rayDistance, Color.red, 1f);
+            Debug.DrawRay(cube.transform.position, direction * RayDistance, Color.red, 1f);
         }
     }
 
-    public void AnimateGrowing(Vector3 targetScale, Vector3 targetPosition, float duration)
+    public void WaitAndUpdateCubes()
     {
-        //if (targetScale.x >= 1 || targetScale.z >= 1)return;
-        StartCoroutine(AnimateGrowth(targetScale, targetPosition, 1f));
+        StartCoroutine(WaitAndDestroy());
+    }
+    private IEnumerator WaitAndDestroy()
+    {
+        yield return new WaitForSeconds(0.5f);
+        CheckNeighborsAndDestroy();
+    }
+    public void AnimateGrowing(Vector3 targetScale, Vector3 targetPosition)
+    {
+        StartCoroutine(AnimateGrowth(targetScale, targetPosition));
         
     }
-    private IEnumerator AnimateGrowth(Vector3 targetScale, Vector3 targetPosition, float duration)
+    
+    private IEnumerator AnimateGrowth(Vector3 targetScale, Vector3 targetPosition)
     {
         var initialScale = transform.localScale;
         var elapsedTime = 0f;
+        var duration = 0.2f;
         var originalPosition = transform.localPosition;
-    
+        
         while (elapsedTime < duration)
         {
             elapsedTime += Time.deltaTime;
@@ -123,17 +143,19 @@ public class Cube : MonoBehaviour
     
         transform.localScale = targetScale;
         transform.localPosition = targetPosition;
+
     }
 
     public void DestroyCube()
     {
-        _parentBox.cubes.Remove(this);
-        _parentBox.locationToCubeDict.Remove(cubeLocation);
+        parentBox.cubes.Remove(this);
+        parentBox.locationToCubeDict.Remove(cubeLocation);
         Destroy(gameObject);
-        if (_parentBox.cubes.Count == 0)
+        if (parentBox.cubes.Count == 0)
         {
-            _parentBox.DestroyBox();
+            parentBox.DestroyBox();
         }
+        
     }
 }
 

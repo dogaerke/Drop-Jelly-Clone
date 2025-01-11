@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BoxManager : MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class BoxManager : MonoBehaviour
     public GameObject boxPrefab;
     public Transform startPos;
     public List<BoxController> boxList;
+    public Image GameOverScene;
+    
     private GameObject _box;
     private float _boxSize = 1f;
     private Color[] colors = new Color[] { Color.red, Color.green, Color.blue, Color.yellow, Color.magenta, Color.cyan};
@@ -30,6 +33,7 @@ public class BoxManager : MonoBehaviour
     
     private void Start()
     {
+        GameOverScene.gameObject.SetActive(false);
         SpawnNewBox();
     }
 
@@ -348,7 +352,50 @@ public class BoxManager : MonoBehaviour
 
         return newColor;
     }
-    
+
+    public IEnumerator TryDropBoxesAfterExplosion()
+    {
+        foreach (var box in boxList)
+        {
+            Debug.Log("TryDropBoxes");
+
+            var position = box.transform.localPosition;
+            var currentTilePosition = new Vector2(position.x, position.z);
+            var belowTilePosition = currentTilePosition + Vector2.down;
+
+            
+            if (GridManager.Instance.Tiles.TryGetValue(belowTilePosition, out var belowTile))
+            {
+                if (!belowTile.isFull)
+                {
+                    var localPosition = box.transform.localPosition;
+                    var targetPosition = new Vector3(localPosition.x, localPosition.y, localPosition.z - 1);
+                    yield return StartCoroutine(MoveToPosition(targetPosition, box));
+                }
+            }
+        }
+        
+        
+    }
+    private IEnumerator MoveToPosition(Vector3 targetPosition, BoxController box)
+    {
+        var position = box.transform.position;
+        var oldPos = new Vector2(position.x, position.z);
+        var newPos = new Vector2(targetPosition.x, targetPosition.z);
+        
+        GridManager.Instance.Tiles[oldPos].SetTileFullness(false);
+        GridManager.Instance.Tiles[newPos].SetTileFullness(true);
+        
+        while (Vector3.Distance(box.transform.localPosition, targetPosition) > 0.01f)
+        {
+            box.transform.localPosition = Vector3.MoveTowards(box.transform.localPosition, targetPosition, 5f * Time.deltaTime);
+            yield return null;
+        }
+        box.transform.localPosition = targetPosition;
+        yield return new WaitForSeconds(0.3f);
+        box.DestroySameColorCubes();
+
+    }
     
     
 

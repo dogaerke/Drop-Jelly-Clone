@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 
 public class BoxController : MonoBehaviour
@@ -19,28 +20,29 @@ public class BoxController : MonoBehaviour
     private void Start()
     {
         OnBoxDropped += HandleBoxDropped;
+        
         cubes = new List<Cube>(gameObject.GetComponentsInChildren<Cube>());
         foreach (var c in cubes)
         {
             locationToCubeDict.Add(c.cubeLocation, c);
         }
 
-        foreach (var v in locationToCubeDict)
-        {
-            Debug.Log("Location: " + v.Key);
-        }
-
     }
     private void OnDestroy()
     {
         OnBoxDropped -= HandleBoxDropped;
-        StopAllCoroutines();
     }
 
     
     private void Update()
     {
+        TouchControl();
+    }
+
+    private void TouchControl()
+    {
         if (!isActive) return;
+        if (EventSystem.current.IsPointerOverGameObject()) return;
 
         if (Input.touchCount > 0)
         {
@@ -49,12 +51,10 @@ public class BoxController : MonoBehaviour
             switch (touch.phase)
             {
                 case TouchPhase.Began:
-                    Debug.Log("Touch Phase Began");
                     touchStartPos = touch.position;
                     break;
 
                 case TouchPhase.Moved:
-                    Debug.Log("Touch Phase Moved");
                     touchDirection = touch.position - touchStartPos;
 
                     if (Mathf.Abs(touchDirection.x) > 50f)
@@ -73,18 +73,17 @@ public class BoxController : MonoBehaviour
                     break;
 
                 case TouchPhase.Ended:
-                    Debug.Log("Touch Phase Ended");
-                    DropBox();
+                    DropBox(1.5f);
                     break;
             }
         }
     }
-    
-    private void MoveBox(Vector3 _direction)
+
+    private void MoveBox(Vector3 direction)
     {
         var gridManager = GridManager.Instance;
 
-        var newPosition = transform.position + _direction;
+        var newPosition = transform.position + direction;
 
         if (newPosition.x >= 0 && newPosition.x <= (gridManager.width - 1) * gridManager.gridStep)
         {
@@ -93,18 +92,28 @@ public class BoxController : MonoBehaviour
     }
 
 
-    private void DropBox()
+    public void DropBox(float duration)
     {
-        StartCoroutine(DropActiveBox());
+        StartCoroutine(DropActiveBox(duration));
     }
     
     private void HandleBoxDropped(Vector3 targetPos)
     {
         GridManager.Instance.Tiles.TryGetValue(new Vector2(targetPos.x, targetPos.z), out var tile);
-        if (tile) tile.SetTileFull(true);
+        if (tile) tile.SetTileFullness(true);
         
         DestroySameColorCubes();
+        ControlIsGameOver();
         TrySpawnNewBox();
+    }
+
+    private void ControlIsGameOver()
+    {
+        if (Mathf.Abs(transform.localPosition.z - GridManager.Instance.height - 1) < 0.1f)
+        {
+            Debug.Log("GAME OVER !");
+            BoxManager.Instance.GameOverScene.gameObject.SetActive(true);
+        }
     }
 
     private static void TrySpawnNewBox()
@@ -125,38 +134,33 @@ public class BoxController : MonoBehaviour
         }
     }
 
-    private void DestroySameColorCubes()
+    public void DestroySameColorCubes()
     {
         for (var i = 0; i < cubes.Count; i++)
         {
+            Debug.Log("DestroySameColors");
             cubes[i].CheckNeighborsAndDestroy();
-
         }
-        // foreach (var c in cubes)
-        // {
-        //     c.CheckNeighborsAndDestroy();
-        //         
-        // }
     }
 
-    private IEnumerator DropActiveBox()
+    private IEnumerator DropActiveBox(float duration)
     {
         var targetPosition = FindLowestAvailablePosition();
+        if (targetPosition == new Vector3(-1, -1, -1)) yield break;
         isActive = false;
         
-        const float duration = 1.5f;
         var elapsedTime = 0f;
 
         while (elapsedTime < duration)
         {
             elapsedTime += Time.deltaTime;
             var t = Mathf.SmoothStep(0, 1, elapsedTime / duration);
-            transform.position = Vector3.Lerp(transform.position, targetPosition, t);
+            transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, t);
             yield return null;
         }
     
-        transform.position = targetPosition;
-        if (Mathf.Abs(transform.position.z - targetPosition.z) < 0.001f)
+        transform.localPosition = targetPosition;
+        if (Mathf.Abs(transform.localPosition.z - targetPosition.z) < 0.001f)
         {
             OnBoxDropped?.Invoke(targetPosition);
             
@@ -166,12 +170,19 @@ public class BoxController : MonoBehaviour
     private Vector3 FindLowestAvailablePosition()
     {
         var gridManager = GridManager.Instance;
-        var startPosition = transform.position;
+        var startPosition = transform.localPosition;
 
-        var initialPosition = new Vector3(startPosition.x, startPosition.y, gridManager.height - gridManager.gridStep);
+        var initialPosition = new Vector3(startPosition.x, startPosition.y, startPosition.z);
+        if (initialPosition.z - BoxManager.Instance.startPos.position.z < 0.1f)
+        {
+            initialPosition.z = gridManager.height - gridManager.gridStep;
+        }
+        
         if (IsGridOccupied(initialPosition))
         {
-            Debug.Log("Game Over");
+            Debug.Log("Game Over!!!");
+            BoxManager.Instance.GameOverScene.gameObject.SetActive(true);
+
             /////TODO GameManager.Instance.TriggerGameOver();
             return initialPosition;
         }
@@ -181,8 +192,8 @@ public class BoxController : MonoBehaviour
         while (true)
         {
             var nextPosition = currentPosition + Vector3.back * gridManager.gridStep;
-            var a = IsGridOccupied(nextPosition);
-            if (nextPosition.z < 0 || a) break;
+            var isFull = IsGridOccupied(nextPosition);
+            if (nextPosition.z < 0 || isFull) break;
 
             currentPosition = nextPosition;
         }
@@ -199,22 +210,20 @@ public class BoxController : MonoBehaviour
 
     public void DestroyBox()
     {
-        var length = cubes.Count;
-        for (var i = 0; i < length; i++)
-        {
-            var obj = cubes[i].gameObject;
-            cubes.Remove(cubes[i]);
-            locationToCubeDict.Remove(obj.GetComponent<Cube>().cubeLocation);
-            Destroy(obj);
-            
-        }
-        
         GridManager.Instance.Tiles.TryGetValue
             (new Vector2(transform.position.x, transform.position.z), out var tile);
-        if(tile) tile.SetTileFull(false);
+        if(tile) tile.SetTileFullness(false);
         BoxManager.Instance.boxList.Remove(this);
+        StartCoroutine(WaitForDrop());
+    }
+    private IEnumerator WaitForDrop()
+    {
+        Debug.Log("Waiting");
+        yield return new WaitForSeconds(0.5f);
+        StartCoroutine(BoxManager.Instance.TryDropBoxesAfterExplosion());
         Destroy(gameObject);
-        
+
+
     }
     public void UpdateCubes(Transform cubeToDestroy)
     {
@@ -222,7 +231,7 @@ public class BoxController : MonoBehaviour
         {
             Debug.Log("onUpdateCubes");
             cubeToDestroy.gameObject.SetActive(false);
-            rulesData.CheckAndApplyGrowth(locationToCubeDict);
+            rulesData.CheckAndApplyGrowth(ref locationToCubeDict);
         }
         
     }
