@@ -109,7 +109,7 @@ public class BoxController : MonoBehaviour
 
     private void ControlIsGameOver()
     {
-        if (Mathf.Abs(transform.localPosition.z - GridManager.Instance.height - 1) < 0.1f)
+        if (Mathf.Abs(transform.localPosition.z - GridManager.Instance.height - 1) < 0.5f)
         {
             Debug.Log("GAME OVER !");
             BoxManager.Instance.GameOverScene.gameObject.SetActive(true);
@@ -138,7 +138,6 @@ public class BoxController : MonoBehaviour
     {
         for (var i = 0; i < cubes.Count; i++)
         {
-            Debug.Log("DestroySameColors");
             cubes[i].CheckNeighborsAndDestroy();
         }
     }
@@ -229,7 +228,6 @@ public class BoxController : MonoBehaviour
     {
         if (cubeToDestroy)
         {
-            Debug.Log("onUpdateCubes");
             cubeToDestroy.gameObject.SetActive(false);
             rulesData.CheckAndApplyGrowth(ref locationToCubeDict);
         }

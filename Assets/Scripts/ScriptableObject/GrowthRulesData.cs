@@ -69,9 +69,6 @@ public class GrowthRulesData : ScriptableObject
                             cube.WaitAndUpdateCubes();
                         }
                         
-                        //TODO Yeni Location Types atansın
-                        //TODO tekrar destroy olacak cube var mı diye bakılsın
-                        //TODO animate olduktan sonra bir yerde tekrar update etmek gerek
                         locationToCubeMap.TryGetValue(targetGrowthLocation, out var cubeToDestroy);
                         if (cubeToDestroy && !cubeToDestroy.gameObject.activeSelf)
                         {
@@ -94,13 +91,11 @@ public class GrowthRulesData : ScriptableObject
         otherGrowthLocations = default;
         if (!growthRules.TryGetValue(currentLocation, out var growthRule))
         {
-            Debug.Log($"Growth rules not found for slot: {currentLocation}");
             return false;
         }
 
         if (!locationToCubeDict.Keys.Contains(currentLocation)) return false;
         
-        Debug.Log("growthRule.CheckLocations.Count: " + growthRule.CheckLocations.Count);
         foreach (var location in growthRule.CheckLocations)
         {
             if (location == CubeLocation.Null)
@@ -109,7 +104,6 @@ public class GrowthRulesData : ScriptableObject
                 return true;
             }
             
-            Debug.Log($"Location: {location}");
             locationToCubeDict.TryGetValue(location, out var cube);
             
             if (cube && !cube.gameObject.activeSelf)
@@ -118,7 +112,6 @@ public class GrowthRulesData : ScriptableObject
                 if (growthRule.AdjacentParentLocations != null && !growthRule.AdjacentParentLocations.Contains(location))
                 {
                     availableLocation = location;
-                    Debug.Log("Available Slot: " + availableLocation);
                     return true;
 
                 }
@@ -128,12 +121,12 @@ public class GrowthRulesData : ScriptableObject
                 
                 var checkList = growthRule.CheckLocations;
                 var intersectionList = otherGrowthLocations?.Intersect(checkList).ToList();
-                Debug.Log("Here");
-                if (intersectionList.Count == 0) continue;
+                if (intersectionList == null) return false;
+                
+                if (intersectionList?.Count == 0) continue;
                 availableLocation = intersectionList[0];
                 otherGrowthLocations?.Remove(availableLocation);
 
-                Debug.Log("alsoHere, available Location");
                 
                 return true;
                 

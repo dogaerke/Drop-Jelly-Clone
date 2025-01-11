@@ -357,8 +357,6 @@ public class BoxManager : MonoBehaviour
     {
         foreach (var box in boxList)
         {
-            Debug.Log("TryDropBoxes");
-
             var position = box.transform.localPosition;
             var currentTilePosition = new Vector2(position.x, position.z);
             var belowTilePosition = currentTilePosition + Vector2.down;
