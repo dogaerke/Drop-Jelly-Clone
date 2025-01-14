@@ -13,6 +13,7 @@ public class Tile : MonoBehaviour
     public void SetTileFullness(bool isFull)
     {
         this.isFull = isFull;
+        Debug.Log("---------------------------------------------------------" + isFull + x + y);
     }
     
 }

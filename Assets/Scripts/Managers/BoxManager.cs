@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class BoxManager : MonoBehaviour
@@ -11,12 +12,14 @@ public class BoxManager : MonoBehaviour
     public GameObject cubePrefab;  
     public GameObject boxPrefab;
     public Transform startPos;
-    public List<BoxController> boxList;
-    public Image GameOverScene;
+    //public List<BoxController> boxList;
+
+    public Image gameOverScene;
+    public Dictionary<Vector2, BoxController> boxDict = new Dictionary<Vector2, BoxController>();
     
     private GameObject _box;
     private float _boxSize = 1f;
-    private Color[] colors = new Color[] { Color.red, Color.green, Color.blue, Color.yellow, Color.magenta, Color.cyan};
+    private Color[] _colors = { Color.red, Color.green, Color.blue, Color.yellow, Color.magenta, Color.cyan};
     
     public static BoxManager Instance { get; private set; }
     
@@ -33,13 +36,13 @@ public class BoxManager : MonoBehaviour
     
     private void Start()
     {
-        GameOverScene.gameObject.SetActive(false);
+        gameOverScene.gameObject.SetActive(false);
         SpawnNewBox();
     }
 
     private void OnDestroy()
     {
-        boxList.Clear();
+        boxDict.Clear();
     }
 
     public void SpawnNewBox()
@@ -47,11 +50,31 @@ public class BoxManager : MonoBehaviour
         var randomCombination = (BoxCombination)UnityEngine.Random.Range(0, 4);
         CreateBox(randomCombination);
     }
-    
+
+    public void AddNewBoxToList(Vector2 pos, BoxController box)
+    {
+        if (!TryGetBox(pos, out var b))
+        {
+            boxDict?.Add(pos, box);
+            
+        }
+        //boxDict.Add(pos, box);
+    }
+    public bool TryGetBox(Vector2 pos, out BoxController box)
+    {
+        var hasBox = boxDict.TryGetValue(pos, out box);
+        if (hasBox && !box)
+        {
+            boxDict.Remove(pos);
+            return false;
+        }
+        return hasBox;
+
+    }
     private void CreateBox(BoxCombination combination)
     {
         _box = Instantiate(boxPrefab, transform);
-        boxList.Add(_box.GetComponent<BoxController>());
+        //BoxList.Add(_box.GetComponent<BoxController>());
         _box.transform.position = new Vector3(startPos.position.x, 0, startPos.position.z );
         
         _box.GetComponent<BoxController>().isActive = true;
@@ -347,17 +370,25 @@ public class BoxManager : MonoBehaviour
         Color newColor;
         do
         {
-            newColor = colors[UnityEngine.Random.Range(0, colors.Length)];
+            newColor = _colors[UnityEngine.Random.Range(0, _colors.Length)];
         } while (usedColors.Contains(newColor));
 
         return newColor;
     }
 
-    public IEnumerator TryDropBoxesAfterExplosion()
+    public IEnumerator TryDropBoxesAfterExplosion(GameObject obj)
     {
-        foreach (var box in boxList)
+        foreach (var b in boxDict)
         {
-            var position = box.transform.localPosition;
+            Debug.Log(b.Key);
+        }
+
+        foreach (var box in boxDict)
+        {
+            Debug.Log("TryDropBoxesAfterExplosion");
+            if (!box.Value)continue;
+            
+            var position = box.Value.transform.position;
             var currentTilePosition = new Vector2(position.x, position.z);
             var belowTilePosition = currentTilePosition + Vector2.down;
 
@@ -366,32 +397,34 @@ public class BoxManager : MonoBehaviour
             {
                 if (!belowTile.isFull)
                 {
-                    var localPosition = box.transform.localPosition;
-                    var targetPosition = new Vector3(localPosition.x, localPosition.y, localPosition.z - 1);
-                    yield return StartCoroutine(MoveToPosition(targetPosition, box));
+                    var localPosition = box.Value.transform.localPosition;
+                    var targetPosition = new Vector2(localPosition.x, localPosition.z - 1);
+                    yield return StartCoroutine(MoveToPosition(targetPosition, box.Value));
                 }
             }
         }
-        
+        //obj.GetComponent<BoxController>().WaitAndControlNeighbors();
+        Destroy(obj);
         
     }
     private IEnumerator MoveToPosition(Vector3 targetPosition, BoxController box)
     {
         var position = box.transform.position;
         var oldPos = new Vector2(position.x, position.z);
-        var newPos = new Vector2(targetPosition.x, targetPosition.z);
+        var newPos = new Vector2(targetPosition.x, targetPosition.y);
         
         GridManager.Instance.Tiles[oldPos].SetTileFullness(false);
         GridManager.Instance.Tiles[newPos].SetTileFullness(true);
         
-        while (Vector3.Distance(box.transform.localPosition, targetPosition) > 0.01f)
+        while (Vector3.Distance(box.transform.localPosition, new Vector3(targetPosition.x, position.y, targetPosition.y)) > 0.01f)
         {
-            box.transform.localPosition = Vector3.MoveTowards(box.transform.localPosition, targetPosition, 5f * Time.deltaTime);
+            box.transform.localPosition = Vector3.MoveTowards(box.transform.localPosition, 
+                new Vector3(targetPosition.x, position.y, targetPosition.y), 5f * Time.deltaTime);
             yield return null;
         }
-        box.transform.localPosition = targetPosition;
+        box.transform.localPosition = new Vector3(targetPosition.x, position.y, targetPosition.y);
         yield return new WaitForSeconds(0.3f);
-        box.DestroySameColorCubes();
+        box.WaitAndControlNeighbors();
 
     }
     

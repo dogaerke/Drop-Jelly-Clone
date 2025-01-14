@@ -12,8 +12,10 @@ public class BoxController : MonoBehaviour
     public Vector2 touchDirection;
     public bool isActive;
     public List<Cube> cubes;
+    public List<CubeLocation> pasiveCubeLocations;
     public Dictionary<CubeLocation, Cube> locationToCubeDict = new Dictionary<CubeLocation, Cube>();
     public GrowthRulesData rulesData;
+    public NeighborCheckRulesData neighborRulesData;
     
     public event Action<Vector3> OnBoxDropped;
 
@@ -39,6 +41,62 @@ public class BoxController : MonoBehaviour
         TouchControl();
     }
 
+    private Dictionary<BoxLocationForNeighbors, BoxController> DetermineBoxNeighbors()
+    {
+        int distance = GridManager.Instance.gridStep;
+        var boxNeighbourList = new Dictionary<BoxLocationForNeighbors, BoxController>();
+        
+        var pos = transform.position;
+        Debug.Log(pos);
+        //Left
+        if (pos.x - distance >= 0)
+        {
+            if (BoxManager.Instance.TryGetBox(new Vector2(pos.x - distance, pos.z) , out var box))
+            {
+                boxNeighbourList.Add(BoxLocationForNeighbors.Left, box);
+                Debug.Log("LeftNeighbor");
+            }
+        }    
+    
+        //Right
+        if (pos.x + distance < GridManager.Instance.width)
+        {
+            if (BoxManager.Instance.TryGetBox(new Vector2(pos.x + distance, pos.z), out var box))
+            {
+                boxNeighbourList.Add(BoxLocationForNeighbors.Right, box);                
+                Debug.Log("RightNeighbor");
+            }
+
+        }
+    
+        //Down
+        if (pos.z + distance < GridManager.Instance.height)
+        {
+            if (BoxManager.Instance.TryGetBox(new Vector2(pos.x, pos.z + distance), out var box))
+            {
+                boxNeighbourList.Add(BoxLocationForNeighbors.Top, box);
+                Debug.Log("UpNeighbor");
+
+            }
+            
+        }
+    
+        //Up
+        if (pos.z - distance >= 0)
+        {
+            if (BoxManager.Instance.TryGetBox(new Vector2(pos.x, pos.z - distance), out var box))
+            {
+                boxNeighbourList.Add(BoxLocationForNeighbors.Bottom, box);
+                Debug.Log("DownNeighbor");
+            }
+        }
+        
+        
+        return boxNeighbourList;
+    }
+    
+    
+    
     private void TouchControl()
     {
         if (!isActive) return;
@@ -102,17 +160,18 @@ public class BoxController : MonoBehaviour
         GridManager.Instance.Tiles.TryGetValue(new Vector2(targetPos.x, targetPos.z), out var tile);
         if (tile) tile.SetTileFullness(true);
         
-        DestroySameColorCubes();
+        BoxManager.Instance.AddNewBoxToList(new Vector2(targetPos.x, targetPos.z), this);
+        WaitAndControlNeighbors();
         ControlIsGameOver();
         TrySpawnNewBox();
     }
 
     private void ControlIsGameOver()
     {
-        if (Mathf.Abs(transform.localPosition.z - GridManager.Instance.height - 1) < 0.5f)
+        if (Mathf.Abs(transform.localPosition.z - GridManager.Instance.height - GridManager.Instance.gridStep) < 0.5f)
         {
             Debug.Log("GAME OVER !");
-            BoxManager.Instance.GameOverScene.gameObject.SetActive(true);
+            BoxManager.Instance.gameOverScene.gameObject.SetActive(true);
         }
     }
 
@@ -120,9 +179,9 @@ public class BoxController : MonoBehaviour
     {
         var flag = false;
         
-        foreach (var box in BoxManager.Instance.boxList)
+        foreach (var box in BoxManager.Instance.boxDict)
         {
-            if (box.isActive)
+            if (box.Value.isActive)
             {
                 flag = true;  //if there is activeBox, don't spawn new box
             }
@@ -133,14 +192,71 @@ public class BoxController : MonoBehaviour
             BoxManager.Instance.SpawnNewBox();
         }
     }
-
-    public void DestroySameColorCubes()
+    public void WaitAndControlNeighbors()
     {
-        for (var i = 0; i < cubes.Count; i++)
+        StartCoroutine(WaitAndDestroy());
+    }
+    private IEnumerator WaitAndDestroy()
+    {
+        yield return new WaitForSeconds(0.3f);
+        ControlNeighborBoxes();
+    }
+    public void ControlNeighborBoxes()
+    {
+        var neighborList = DetermineBoxNeighbors();
+        
+        //Debug.Log("1");
+        if (neighborList.Count == 0)return;
+        //Debug.Log("2");
+        int counter = 0;
+        foreach (var neighborBox in neighborList)
         {
-            cubes[i].CheckNeighborsAndDestroy();
+            Debug.Log("NeighborKey: " + neighborBox.Key + "NeighborValue" + neighborBox.Value.transform.position , neighborBox.Value);
+
+            var checkData = neighborRulesData.NeighborCheckList[neighborBox.Key];
+            
+            foreach (var v in checkData.MainCheckList)
+            {
+                //Debug.Log("Locs : " + v);
+                
+                
+                neighborBox.Value.locationToCubeDict.TryGetValue(v.Key, out var neighborCube);
+
+                if (neighborCube)
+                {
+                    var locationData = v.Value;
+                    var locToControlList = locationData.Loc;
+
+                    foreach (var location in locToControlList)
+                    {
+                        
+                        locationToCubeDict.TryGetValue(location, out var mainCube);
+
+                        if (mainCube)
+                        {
+                            Debug.Log("N: " + v.Key + " mainCube: " + location);
+                            if (mainCube.ControlCubesColor(neighborCube))
+                                counter++;
+                                //break;
+                             if (counter > 1)
+                                 break;
+
+                        }
+                        
+                    }
+                    if (counter>1)
+                        break;
+                    Debug.Log("foreach1");
+                }
+                if (counter>1)
+                    break;
+                Debug.Log("foreach2");
+
+            }
+            
         }
     }
+
 
     private IEnumerator DropActiveBox(float duration)
     {
@@ -179,8 +295,8 @@ public class BoxController : MonoBehaviour
         
         if (IsGridOccupied(initialPosition))
         {
-            Debug.Log("Game Over!!!");
-            BoxManager.Instance.GameOverScene.gameObject.SetActive(true);
+            //Debug.Log("Game Over!!!");
+            BoxManager.Instance.gameOverScene.gameObject.SetActive(true);
 
             /////TODO GameManager.Instance.TriggerGameOver();
             return initialPosition;
@@ -209,28 +325,30 @@ public class BoxController : MonoBehaviour
 
     public void DestroyBox()
     {
-        GridManager.Instance.Tiles.TryGetValue
-            (new Vector2(transform.position.x, transform.position.z), out var tile);
+        var pos = new Vector2(transform.position.x, transform.position.z);
+        
+        GridManager.Instance.Tiles.TryGetValue(pos, out var tile);
         if(tile) tile.SetTileFullness(false);
-        BoxManager.Instance.boxList.Remove(this);
+        cubes.Remove(cubes[0]);
+        BoxManager.Instance.boxDict.Remove(pos);
+        //gameObject.SetActive(false);
+        //Destroy(gameObject);
+        //Debug.Log("Destroybox");
         StartCoroutine(WaitForDrop());
     }
     private IEnumerator WaitForDrop()
     {
-        Debug.Log("Waiting");
-        yield return new WaitForSeconds(0.5f);
-        StartCoroutine(BoxManager.Instance.TryDropBoxesAfterExplosion());
-        Destroy(gameObject);
-
-
+        //Debug.Log("Waiting");
+        yield return new WaitForSeconds(0.7f);
+        StartCoroutine(BoxManager.Instance.TryDropBoxesAfterExplosion(gameObject));
     }
-    public void UpdateCubes(Transform cubeToDestroy)
-    {
-        if (cubeToDestroy)
-        {
-            cubeToDestroy.gameObject.SetActive(false);
-            rulesData.CheckAndApplyGrowth(ref locationToCubeDict);
-        }
-        
-    }
+    
+}
+
+public enum BoxLocationForNeighbors
+{
+    Top,
+    Bottom,
+    Left,
+    Right
 }

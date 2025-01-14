@@ -212,12 +212,44 @@ MonoBehaviour:
     - Key:
         newLocationMap:
           _serializedList:
+          - Key: 2
+            Value: 9
+          - Key: 3
+            Value: 8
+      Value: 6
+    - Key:
+        newLocationMap:
+          _serializedList:
+          - Key: 4
+            Value: 9
+          - Key: 5
+            Value: 8
+      Value: 7
+    - Key:
+        newLocationMap:
+          _serializedList:
+          - Key: 2
+            Value: 7
+          - Key: 4
+            Value: 6
+      Value: 8
+    - Key:
+        newLocationMap:
+          _serializedList:
+          - Key: 3
+            Value: 7
+          - Key: 5
+            Value: 6
+      Value: 9
+    - Key:
+        newLocationMap:
+          _serializedList:
           - Key: 8
             Value: 9
           - Key: 9
             Value: 8
-          - Key: 7
-            Value: 6
           - Key: 6
             Value: 7
+          - Key: 7
+            Value: 6
       Value: 10

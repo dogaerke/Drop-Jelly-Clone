@@ -49,3 +49,4 @@ MonoBehaviour:
   isActive: 0
   cubes: []
   rulesData: {fileID: 11400000, guid: 532686775320c98428f890a66d77f582, type: 2}
+  neighborRulesData: {fileID: 11400000, guid: 046d7ab13dc4d234ca3a3451a9b988e1, type: 2}

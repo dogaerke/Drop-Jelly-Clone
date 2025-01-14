@@ -784,7 +784,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &978636413
 RectTransform:
   m_ObjectHideFlags: 0
@@ -941,8 +941,7 @@ MonoBehaviour:
   boxPrefab: {fileID: 7839634941633687463, guid: 9ef929dd1ebb05144b2ab5c649afbc2b,
     type: 3}
   startPos: {fileID: 1066280500}
-  boxList: []
-  GameOverScene: {fileID: 978636414}
+  gameOverScene: {fileID: 978636414}
 --- !u!4 &1629148339
 Transform:
   m_ObjectHideFlags: 0
@@ -1080,10 +1079,10 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1903430396}
+  - {fileID: 213077241}
   - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 279125880}
   - {fileID: 1616724046}
   - {fileID: 1066280500}
-  - {fileID: 213077241}
